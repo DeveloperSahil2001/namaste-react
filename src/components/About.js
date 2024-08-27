@@ -1,5 +1,4 @@
 import User from "./User";
-// import UserClass from "./UserClass";
 import React from "react";
 
 class About extends React.Component {
@@ -11,10 +10,10 @@ class About extends React.Component {
 
   render() {
     return (
-      <div className="about">
-        <h1>About</h1>
+      <div className="about m-4 p-4">
+        <h1 className='text-center font-bold'>About US</h1>
         <h2>About Component</h2>
-        <User />
+        <User name="Sahil"/>
       </div>
     );
   }
