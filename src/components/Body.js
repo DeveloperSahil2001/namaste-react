@@ -1,9 +1,10 @@
-import ResturantCard, { withPromotedLabel } from "./ResturantCard";
-import { useEffect, useState } from "react";
+import ResturantCard, { withVegLabel } from "./ResturantCard";
+import { useEffect, useState, useContext } from "react";
 import Shimmer from "./Shimmer";
 import { LIST_RESTAURANTS_URL } from "../utils/constants";
 import { Link } from "react-router-dom";
-import useOnlineStatus from "../utils/useOnlineStatus"
+import useOnlineStatus from "../utils/useOnlineStatus";
+import UserContext from "../utils/UserContext";
 
 const Body = () => {
   const [listOfResturants, setListOfResturants] = useState([]);
@@ -12,24 +13,27 @@ const Body = () => {
 
   const [searchText, setSearchText] = useState("");
 
-  const ResturantCardPromoted = withPromotedLabel(ResturantCard);
+  const ResturantCardVeg = withVegLabel(ResturantCard);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-
     const data = await fetch(LIST_RESTAURANTS_URL);
 
     const json = await data.json();
 
     let resturants;
 
-    if(json?.data?.cards != undefined){
-      for(const card of json.data.cards){
-        if(card?.card?.card?.gridElements?.infoWithStyle?.restaurants != undefined){
-          resturants = card?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+    if (json?.data?.cards != undefined) {
+      for (const card of json.data.cards) {
+        if (
+          card?.card?.card?.gridElements?.infoWithStyle?.restaurants !=
+          undefined
+        ) {
+          resturants =
+            card?.card?.card?.gridElements?.infoWithStyle?.restaurants;
           break;
         }
       }
@@ -41,9 +45,15 @@ const Body = () => {
 
   const onlineStatus = useOnlineStatus();
 
-  if(onlineStatus == false){
-    return <h1>No internet connection found! Please check your internet connection.</h1>
+  if (onlineStatus == false) {
+    return (
+      <h1>
+        No internet connection found! Please check your internet connection.
+      </h1>
+    );
   }
+
+  const { loggedInUser, setUserName } = useContext(UserContext);
 
   return listOfResturants?.length == 0 ? (
     <Shimmer />
@@ -59,12 +69,15 @@ const Body = () => {
             }}
             value={searchText}
           />
-          <button className="px-4 py-2 bg-green-100 m-4 rounded-lg" onClick={() => {
-            const filteredList = listOfResturants.filter(
-              (res) => res.info.name.toLowerCase().includes(searchText.toLowerCase())
-            );
-            setFilteredResturants(filteredList)
-          }}>
+          <button
+            className="px-4 py-2 bg-green-100 m-4 rounded-lg"
+            onClick={() => {
+              const filteredList = listOfResturants.filter((res) =>
+                res.info.name.toLowerCase().includes(searchText.toLowerCase())
+              );
+              setFilteredResturants(filteredList);
+            }}
+          >
             Search
           </button>
         </div>
@@ -81,11 +94,24 @@ const Body = () => {
             Top Rated Resturants
           </button>
         </div>
+        <div className="m-4 p-4 flex items-center">
+          <label>Username:</label>
+          <input
+            className="border border-black m-2 p-2"
+            value={loggedInUser}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap justify-evenly">
+        {console.log(filteredResturants)}
         {filteredResturants?.map((resData) => (
-          <Link key={resData.info.id} to={'/resturants/'+resData.info.id}>
-            {resData?.info?.promoted ? <ResturantCard resData={resData} /> : <ResturantCardPromoted resData={resData} />}
+          <Link key={resData.info.id} to={"/resturants/" + resData.info.id}>
+            {resData?.info?.veg ? (
+              <ResturantCardVeg resData={resData} />
+            ) : (
+              <ResturantCard resData={resData} />
+            )}
           </Link>
         ))}
       </div>
